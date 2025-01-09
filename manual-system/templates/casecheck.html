@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>人工處理子系統</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js' defer></script>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        main {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #444;
+            margin-bottom: 30px;
+        }
+
+        #main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        /* Left Section */
+        #left {
+            flex: 1;
+            min-width: 300px;
+            height: 50vh;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #left img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        /* Form Styling */
+        form {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        #div-ai,
+        #div-man {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Button Styling */
+        #div-button {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        button,
+        .return-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .return-button {
+            background-color: #6c757d;
+            text-decoration: none;
+        }
+
+        button:hover,
+        .return-button:hover {
+            background-color: #5a6268;
+        }
+
+        button[type="submit"] {
+            background-color: #28a745;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>人工處理子系統</h1>
+        <div id="main">
+            <!-- Left Section: Violation Image -->
+            <div id="left">
+                <img src="{{ violation[1] }}" alt="Violation Image">
+            </div>
+
+            <!-- Right Section: Form -->
+            <div id="right">
+                <form action="/casecheck?violation_id={{ violation[0] }}" method="POST">
+                    <div id="div-ai">
+                        <p><strong>AI辨識結果:</strong></p>
+                        <p><!-- AI Result Placeholder --></p>
+                    </div>
+                    <div id="div-man">
+                        <label for="manual_recognize_plate">人工辨識結果</label>
+                        <input type="text" name="manual_recognize_plate" id="manual_recognize_plate" required>
+                    </div>
+
+                    <div id="div-button">
+                        <a href="/caseview_all_manual" class="return-button">返回案件檢視</a>
+                        <button type="submit">儲存</button>
+                    </div>
+
+                    <input type="hidden" name="violation_id" value="{{ violation[0] }}">
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

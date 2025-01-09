@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超速罰單</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ticket-container {
+            width: 70%;
+            margin: 20px auto;
+            background-color: #ffeff1;
+            border: 2px solid #d1a7a7;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin: 10px 0;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: -20px;
+        }
+
+        .red-stamp {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: red;
+            font-size: 24px;
+            font-weight: bold;
+            transform: rotate(-15deg);
+            border: 3px solid red;
+            padding: 5px 10px;
+        }
+
+        .photo-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+
+        .photo-section img {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f7d9d9;
+            color: #333;
+        }
+
+        .highlight {
+            background-color: #f4bebe;
+        }
+
+        .signature-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .signature-box1 {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border: 2px dashed #000;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .signature-box1 img {
+            margin-top: 10px;
+            width: 150px;
+            /* Increased size */
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px;
+        }
+
+        .signature-box2 {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border: 2px dashed #000;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .signature-box2 img {
+            margin-top: 10px;
+            width: 120px;
+            /* Increased size */
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer {
+            text-align: left;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket-container">
+        <div class="header">
+            <h1>內政部警政署國道公路警察局</h1>
+            <h2>舉發違反道路交通管理事件通知單</h2>
+            <div class="red-stamp">違規通知</div>
+        </div>
+        <div class="photo-section">
+            <img src="placeholder-photo.jpg" alt="違規照片">
+        </div>
+        <table>
+            <tr>
+                <th class="highlight">罰單編號</th>
+                <td>110523D58</td>
+                <th class="highlight">車牌號碼</th>
+                <td>ABC-1234</td>
+            </tr>
+            <tr>
+                <th>駕駛人姓名</th>
+                <td>王小明</td>
+                <th>性別</th>
+                <td>男</td>
+            </tr>
+            <tr>
+                <th>出生年月日</th>
+                <td>1985-07-15</td>
+                <th>違規時間</th>
+                <td>2024-12-26 14:30</td>
+            </tr>
+            <tr>
+                <th>違規地點</th>
+                <td colspan="3">台北市忠孝東路三段</td>
+            </tr>
+            <tr>
+                <th class="highlight">實際速度 (km/h)</th>
+                <td class="highlight">83</td>
+                <th class="highlight">限速 (km/h)</th>
+                <td class="highlight">60</td>
+            </tr>
+            <tr>
+                <th>罰款金額 (新台幣)</th>
+                <td>3000</td>
+                <th>違規內容</th>
+                <td>超速行駛違反交通管理條例第33條第1項。</td>
+            </tr>
+        </table>
+        <div class="signature-section">
+            <div class="signature-box1">
+                填單人員名章
+                <img src="填單人員.png" alt="填單人員名章印章">
+            </div>
+            <div class="signature-box2">
+                舉發單位
+                <img src="舉發單位蓋章.png" alt="舉發單位印章">
+            </div>
+        </div>
+        <div class="footer">
+            <p>注意事項：如對本通知有疑問，可於收到通知之日起7日內向當地交通主管部門申請復議或進行陳述。<br>聯絡電話：0800-XXX-XXX<br>罰款支付截止日期：20XX-XX-XX</p>
+        </div>
+    </div>
+</body>
+
+</html>
