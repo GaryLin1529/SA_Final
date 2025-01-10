@@ -370,7 +370,6 @@ def update_status(violation_id):
     except Exception as e:
         logger.error(f"Error updating status_print for violation_id {violation_id}: {e}")
         return "An error occurred while updating the status.", 500
-
 @app.route('/ticket/<int:violation_id>')
 def ticket(violation_id):
     try:
@@ -395,55 +394,25 @@ def ticket(violation_id):
             WHERE v.violation_id = %s
         """, (violation_id,))
         violation = cur.fetchone()
-        cur.close()
-
+        
         if violation:
             # Process the image_path to correct the prefix
             updated_path = violation[8].replace("manual-system\\", "/").replace("manual-system/", "/")
             violation = list(violation)  # Convert tuple to list if needed
             violation[8] = updated_path  # Update the image_path
-            
+
             return render_template('ticket.html', violation=violation)
         else:
-            return render_template('noticket.html')
+            # Query to fetch the license_plate for the violation_id
+            cur.execute("SELECT license_plate FROM violations WHERE violation_id = %s", (violation_id,))
+            license_plate = cur.fetchone()
+
+            # If no violation is found, pass violation_id and license_plate to the template
+            return render_template('noticket.html', violation_id=violation_id, license_plate=license_plate)
+
     except Exception as e:
         logger.error(f"Ticket generation error: {e}")
-        return "An error occurred during ticket generation.", 500
-
-
-@app.route('/noticket', methods=['GET'])
-def noticket():
-    if 'user_id' not in session:
-        return redirect(url_for('index'))
-    try:
-        # Fetch the violation ID from the query parameters
-        violation_id = request.args.get('violation_id')
-
-        if not violation_id:
-            logger.error("Violation ID is missing.")
-            return render_template('noticket.html', violation_reason="未提供違規記錄 ID。"), 400
-
-        cur = mysql.connection.cursor()
-
-        # Fetch the license_plate for the given violation_id
-        cur.execute('SELECT license_plate FROM violations WHERE violation_id = %s', (violation_id))
-        violation = cur.fetchone()
-        cur.close()
-
-        if not violation:
-            logger.info(f"No record found for violation ID: {violation_id}")
-            return render_template(
-                'noticket.html',
-                violation_reason=f"找不到與違規記錄 ID {violation_id} 相關的車牌資訊。"
-            ), 404
-
-        # If violation exists, provide the license_plate as the reason
-        license_plate = violation[0]
-        return render_template('noticket.html', violation_reason=f"車牌號碼 {license_plate} 找不到相關記錄。")
-
-    except Exception as e:
-        logger.error(f"Error displaying noticket: {e}")
-        return render_template('noticket.html', violation_reason="系統發生錯誤。"), 500
+        return render_template('noticket.html', violation_id=violation_id, license_plate=None)
 
 
 if __name__ == '__main__':
