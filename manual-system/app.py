@@ -100,7 +100,7 @@ def caseview_all():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status, status_print FROM violations WHERE TRIM(recognition) = %s', ("success",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status_print FROM violations WHERE TRIM(recognition) = %s', ("success",))
         violations = cur.fetchall()
 
         # Process the violations to remove 'manual-system' from image_path
@@ -340,10 +340,10 @@ def ticket(violation_id):
                 v.violation_id, 
                 v.license_plate, 
                 v.violation_time, 
-                vi.location AS violation_location, 
-                vi.speed AS actual_speed, 
-                vi.speed_limit, 
-                vi.fee AS fine_amount, 
+                v.location AS violation_location, 
+                v.car_speed AS actual_speed, 
+                v.speed_limit, 
+                v.fee AS fine_amount, 
                 v.violation_description, 
                 v.image_path,
                 c.driver_name, 
@@ -351,7 +351,6 @@ def ticket(violation_id):
                 c.birth_date 
             FROM violations v
             JOIN car_information c ON v.license_plate = c.license_plate
-            JOIN violations_information vi ON v.violation_id = vi.id
             WHERE v.violation_id = %s
         """, (violation_id,))
         violation = cur.fetchone()
@@ -400,8 +399,8 @@ def update_status(violation_id):
     try:
         # Update the `status_print` to `printed` for the given violation_id
         with mysql.connection.cursor() as cur:
-            cur.execute("UPDATE violations SET status_print = %s WHERE violation_id = %s AND status_print = %s",
-                        ("printed", violation_id, "not-printed"))
+            cur.execute("UPDATE violations SET status_print = %s WHERE violation_id = %s",
+                        ("printed", violation_id))
             mysql.connection.commit()
 
         # Redirect to a confirmation page or back to the main case view

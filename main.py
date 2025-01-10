@@ -10,7 +10,7 @@ def run_human_sql():
             database="human"
         )
         cursor = conn.cursor()
-        with open('c:/SA_Final/manual-system/human.sql', 'r') as file:  # 使用完整路徑
+        with open('c:/SA_Final/manual-system/human.sql', 'r', encoding='utf-8') as file:  # 使用完整路徑
             sql = file.read()
         for result in cursor.execute(sql, multi=True):
             pass

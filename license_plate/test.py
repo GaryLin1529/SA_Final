@@ -27,18 +27,31 @@ def connect_to_db():
         database="human"         # Update with your DB name
     )
 
-# Insert data into violations table
-def insert_violation(cursor, data):
+# Insert data into ai_results table
+def insert_ai_results(cursor, data):
     query = """
-    INSERT INTO violations (
-        violation_time, location, camera_id, image_path, status, 
-        license_plate, violation_type, violation_description, recognition, status_print
+    INSERT INTO ai_results (
+        image_name, image_path, license_plate, recognition
     ) VALUES (
-        %s, %s, %s, %s, %s, 
-        %s, %s, %s, %s, %s
+        %s, %s, %s, %s
     )
     """
     cursor.execute(query, data)
+
+# Update recognition status and license plate in violations table
+def update_violations(cursor, image_name, recognition, license_plate):
+    query = """
+    UPDATE violations
+    SET recognition = %s, license_plate = %s
+    WHERE image_name = %s
+    """
+    cursor.execute(query, (recognition, license_plate, image_name))
+
+# Function to remove file extensions
+def process_image_name(image_name):
+    if image_name.endswith(('.png', '.jpg', '.jpeg')):
+        image_name = image_name.rsplit('.', 1)[0]
+    return image_name
 
 # Verify the directory exists
 if not os.path.exists(images_dir):
@@ -101,29 +114,32 @@ for filename in os.listdir(images_dir):
             if license_plate_count > 1:
                 recognition_status = "failed"
 
+            # Remove file extension from filename
+            processed_filename = process_image_name(filename)
+
             # Database Insertion (even if no license plate was detected)
             try:
                 db_conn = connect_to_db()
                 cursor = db_conn.cursor()
                 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-                # If no plate detected, leave license_plate as None (or empty string)
-                data = (
-                    current_time,          # violation_time
-                    "Unknown Location",    # location
-                    "CAM-12345",           # camera_id
+                # Data for ai_results table
+                ai_data = (
+                    processed_filename,
                     image_path,            # image_path
-                    "pending",             # status
                     license_plate or "",   # license_plate (empty if not detected)
-                    "Speeding",            # violation_type (example)
-                    "Exceeding speed limit",  # violation_description (example)
-                    recognition_status,     # recognition status (success or failed)
-                    "not-printed"
+                    recognition_status,    # recognition status (success or failed)
                 )
 
-                insert_violation(cursor, data)
+                # Insert into ai_results table
+                insert_ai_results(cursor, ai_data)
+
+                # Update violations table with recognition status and license plate
+                update_violations(cursor, processed_filename, recognition_status, license_plate or "")
+
+                # Commit the transaction
                 db_conn.commit()
-                print(f"Data inserted for {filename}: {license_plate or 'No plate detected'}")
+                print(f"Data processed for {filename}: {license_plate or 'No plate detected'}")
 
             except mysql.connector.Error as err:
                 print(f"Database error: {err}")
