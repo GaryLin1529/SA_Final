@@ -101,4 +101,4 @@ INSERT INTO car_information (license_plate, driver_name, gender, birth_date, add
 
 
 
-ALTER TABLE `violations` ADD COLUMN `longitude` DOUBLE, ADD COLUMN `latitude` DOUBLE;
+
