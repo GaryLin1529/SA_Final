@@ -46,7 +46,9 @@ CREATE TABLE violations (
     violation_description VARCHAR(255),
     status_print VARCHAR(255),
     archive VARCHAR(255),
-    fee INT
+    fee INT,
+	longitude DECIMAL(18, 15),
+	latitude DECIMAL(18, 15)
 );
 INSERT INTO `violations` (`image_name`, `violation_time`, `location`, `camera_id`, `image_path`, `status`, `violation_type`, `speed_limit`, `car_speed`, `coordinates`, `violation_description`, `status_print`, `fee`, `longitude`, `latitude`) VALUES
 ('A01', '2024/1/10 12:00 AM', '台北市中正區信義路二段23號', 'ID004', 'manual-system/static/images/A01.png', 'pending', 'Speeding', '50', '70', '25.035202348798737, 121.52559153744765', '違規超速', 'not-printed', '155', 25.035075899999999, 121.523038075376604),
