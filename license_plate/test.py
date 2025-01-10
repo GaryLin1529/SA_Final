@@ -32,10 +32,10 @@ def insert_violation(cursor, data):
     query = """
     INSERT INTO violations (
         violation_time, location, camera_id, image_path, status, 
-        license_plate, violation_type, violation_description, recognition
+        license_plate, violation_type, violation_description, recognition, status_print
     ) VALUES (
         %s, %s, %s, %s, %s, 
-        %s, %s, %s, %s
+        %s, %s, %s, %s, %s
     )
     """
     cursor.execute(query, data)
@@ -117,7 +117,8 @@ for filename in os.listdir(images_dir):
                     license_plate or "",   # license_plate (empty if not detected)
                     "Speeding",            # violation_type (example)
                     "Exceeding speed limit",  # violation_description (example)
-                    recognition_status     # recognition status (success or failed)
+                    recognition_status,     # recognition status (success or failed)
+                    "not-printed"
                 )
 
                 insert_violation(cursor, data)

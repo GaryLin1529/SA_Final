@@ -151,6 +151,16 @@
             }
         }
 
+        /* Alert styling */
+        .alert {
+            padding: 10px;
+            background-color: #f44336;
+            color: white;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
         #printed {
             background-color: #16283d;
         }
@@ -169,6 +179,13 @@
             <h2>處理清單</h2>
             <button class="back-button" onclick="window.location.href='/'">返回首頁</button>
         </div>
+
+        <!-- Alert for no violations -->
+        {% if alert_message %}
+        <div class="alert">
+            {{ alert_message }}
+        </div>
+        {% endif %}
 
         <!-- Filter Buttons -->
         <div class="filter-buttons">

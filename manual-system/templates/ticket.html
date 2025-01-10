@@ -57,7 +57,10 @@
             border: 1px solid #ddd;
         }
 
-        .photo-section img {}
+        .photo-section img {
+            max-width: 25%;
+            height: 25%;
+        }
 
         table {
             width: 100%;
@@ -103,7 +106,6 @@
         .signature-box1 img {
             margin-top: 10px;
             width: 200px;
-            /* Increased size */
             height: auto;
             display: block;
             margin-left: auto;
@@ -124,7 +126,6 @@
         .signature-box2 img {
             margin-top: 10px;
             width: 200px;
-            /* Increased size */
             height: auto;
             display: block;
             margin-left: auto;
@@ -134,6 +135,25 @@
         .footer {
             text-align: left;
             font-size: 12px;
+            margin-top: 20px;
+        }
+
+        #btn_print {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #btn_print:hover {
+            background-color: #0056b3;
+        }
+
+        #container_print {
+            text-align: center;
             margin-top: 20px;
         }
     </style>
@@ -147,7 +167,7 @@
             <div class="red-stamp">違規通知</div>
         </div>
         <div class="photo-section">
-            <img src="{{violation[11]}}" alt="違規照片">
+            <img src="{{ violation[8] }}" alt="違規照片">
         </div>
         <table>
             <tr>
@@ -158,46 +178,51 @@
             </tr>
             <tr>
                 <th>駕駛人姓名</th>
-                <td>{{ violation[2] }}</td>
+                <td>{{ violation[9] }}</td>
                 <th>性別</th>
-                <td>{{ violation[3] }}</td>
+                <td>{{ violation[10] }}</td>
             </tr>
             <tr>
                 <th>出生年月日</th>
-                <td>{{ violation[4] }}</td>
+                <td>{{ violation[11] }}</td>
                 <th>違規時間</th>
-                <td>{{ violation[5] }}</td>
+                <td>{{ violation[2] }}</td>
             </tr>
             <tr>
                 <th>違規地點</th>
-                <td colspan="3">{{ violation[6] }}</td>
+                <td colspan="3">{{ violation[3] }}</td>
             </tr>
             <tr>
                 <th class="highlight">實際速度 (km/h)</th>
-                <td class="highlight">{{ violation[7] }}</td>
+                <td class="highlight">{{ violation[4] }}</td>
                 <th class="highlight">限速 (km/h)</th>
-                <td class="highlight">{{ violation[8] }}</td>
+                <td class="highlight">{{ violation[5] }}</td>
             </tr>
             <tr>
                 <th>罰款金額 (新台幣)</th>
-                <td>{{ violation[9] }}</td>
+                <td>{{ violation[6] }}</td>
                 <th>違規內容</th>
-                <td>{{ violation[10] }}</td>
+                <td>{{ violation[7] }}</td>
             </tr>
         </table>
         <div class="signature-section">
             <div class="signature-box1">
                 填單人員名章
-                <img src="" alt="">
+
             </div>
             <div class="signature-box2">
                 舉發單位
-                <img src="/static/images/police_stamp-removebg-preview.png" alt="">
+                <img src="/static/images/stamps/police_stamp-removebg-preview.png" alt="警察章">
             </div>
         </div>
         <div class="footer">
             <p>注意事項：如對本通知有疑問，可於收到通知之日起7日內向當地交通主管部門申請復議或進行陳述。<br>聯絡電話：0800-XXX-XXX<br>罰款支付截止日期：20XX-XX-XX</p>
         </div>
+    </div>
+    <div id="container_print">
+        <form action="{{ url_for('update_status', violation_id=violation[0]) }}" method="post">
+            <button id="btn_print" type="submit">列印</button>
+        </form>
     </div>
 </body>
 

@@ -4,7 +4,7 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>人工處理子系統</title>
+    <title>人工辨識子系統</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <style>
         body {
@@ -175,6 +175,16 @@
                 font-size: 1.5rem;
             }
         }
+
+        /* Alert styling */
+        .alert {
+            padding: 10px;
+            background-color: #f44336;
+            color: white;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -186,6 +196,12 @@
             <button class="back-button" onclick="window.location.href='/'">返回首頁</button>
         </div>
 
+        <!-- Alert for no violations -->
+        {% if alert_message %}
+        <div class="alert">
+            {{ alert_message }}
+        </div>
+        {% endif %}
 
         <!-- Filter Buttons -->
         <div class="filter-buttons">
@@ -215,6 +231,8 @@
                 <td>{{ violation[0] }}</td>
                 <td>
                     <img src="{{ violation[1] }}" alt="Violation Image" width="100">
+
+
                 </td>
                 <td>{{ violation[2] }}</td>
                 <td>{{ violation[3] }}</td>
@@ -226,7 +244,6 @@
                     </form>
                 </td>
                 <td>
-                    <!-- Update the form to include the violation_id and use POST for deletion -->
                     <form action="{{ url_for('delete_case') }}" method="post">
                         <input type="hidden" name="violation_id" value="{{ violation[0] }}">
                         <button type="submit" class="delete-button">刪除</button>
@@ -235,7 +252,6 @@
             </tr>
             {% endfor %}
         </table>
+
     </main>
 </body>
-
-</html>

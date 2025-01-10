@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 from datetime import datetime
 
+
 app = Flask(__name__)
 
 # Configure MySQL connection settings
@@ -70,7 +71,7 @@ def caseview_all_manual():
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
         ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
-        cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations WHERE recognition = %s',("failed",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM violations WHERE recognition = %s',("failed",))
         ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
         violations = cur.fetchall()
 
@@ -99,7 +100,7 @@ def caseview_all():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations WHERE TRIM(recognition) = %s', ("success",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status, status_print FROM violations WHERE TRIM(recognition) = %s', ("success",))
         violations = cur.fetchall()
 
         # Process the violations to remove 'manual-system' from image_path
@@ -118,6 +119,68 @@ def caseview_all():
     except Exception as e:
         logger.error(f"Caseview_all error: {e}")
         return "An error occurred while fetching all cases.", 500
+   
+@app.route('/caseview_ticket_pending')
+def caseview_ticket_pending():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    try:
+        user_id = session.get('user_id')
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT violation_id, image_path, license_plate, status, status_print FROM violations WHERE TRIM(recognition) = %s AND TRIM(status_print) = %s', ("success","not-printed",))
+        violations = cur.fetchall()
+
+        # Process the violations to remove 'manual-system' from image_path
+        processed_violations = []
+        for violation in violations:
+            updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
+            processed_violation = list(violation)  # Convert tuple to list if necessary
+            processed_violation[1] = updated_path  # Update the image_path
+            processed_violations.append(processed_violation)
+
+        cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
+        user = cur.fetchone()
+        cur.close()
+
+        if not processed_violations:
+            logger.info("No pending ticket found.")  # Log if no violations are found
+            return render_template('caseview_ticket_pending.html', alert_message="No pending ticket found.", violations=[], processing_personnel=user[0])
+
+        return render_template('caseview_ticket_pending.html', violations=processed_violations, processing_personnel=user[0])
+    except Exception as e:
+        logger.error(f"Caseview_all error: {e}")
+        return "An error occurred while fetching all cases.", 500
+    
+@app.route('/caseview_ticket_processed')
+def caseview_ticket_processed():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    try:
+        user_id = session.get('user_id')
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT violation_id, image_path, license_plate, status, status_print FROM violations WHERE TRIM(recognition) = %s AND TRIM(status_print) = %s', ("success","printed",))
+        violations = cur.fetchall()
+
+        # Process the violations to remove 'manual-system' from image_path
+        processed_violations = []
+        for violation in violations:
+            updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
+            processed_violation = list(violation)  # Convert tuple to list if necessary
+            processed_violation[1] = updated_path  # Update the image_path
+            processed_violations.append(processed_violation)
+
+        cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
+        user = cur.fetchone()
+        cur.close()
+
+        if not processed_violations:
+            logger.info("No processed ticket found.")  # Log if no violations are found
+            return render_template('caseview_ticket_processed.html', alert_message="No processed ticket found.", violations=[], processing_personnel=user[0])
+
+        return render_template('caseview_ticket_processed.html', violations=processed_violations, processing_personnel=user[0])
+    except Exception as e:
+        logger.error(f"Caseview_all error: {e}")
+        return "An error occurred while fetching all cases.", 500
 
 # Route to render caseview_processed.html
 @app.route('/caseview_processed')
@@ -127,7 +190,7 @@ def caseview_processed():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM human.violations WHERE TRIM(status) = %s', ("processed",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s', ("processed","failed",))
         
         violations = cur.fetchall()
         logger.info(f"Fetched violations: {violations}")  # Log the fetched violations
@@ -161,7 +224,7 @@ def caseview_pending():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM human.violations WHERE TRIM(status) = %s', ("pending",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s', ("pending","failed",))
 
         violations = cur.fetchall()
         logger.info(f"Fetched violations: {violations}")  # Log the fetched violations
@@ -186,6 +249,7 @@ def caseview_pending():
     except Exception as e:
         logger.error(f"Caseview_pending error: {e}")
         return "An error occurred while fetching pending cases.", 500
+    
 
 
 @app.route('/casecheck', methods=['GET', 'POST'])
@@ -230,9 +294,9 @@ def casecheck():
                 WHERE violation_id = %s
             """, ("processed", manual_recognize_plate, violation_id))
 
+
             mysql.connection.commit()  # Commit the transaction
             cur.close()
-
             return redirect(url_for('caseview_all_manual'))
 
         except Exception as e:
@@ -245,14 +309,14 @@ def casecheck():
 
             if violation_id:
                 cur = mysql.connection.cursor()
-                cur.execute('SELECT violation_id, image_path, camera_id, status, remarks FROM violations WHERE violation_id = %s', [violation_id])
+                cur.execute('SELECT violation_id, license_plate, image_path, camera_id, status FROM violations WHERE violation_id = %s', [violation_id])
                 violation = cur.fetchone()
 
                 if violation:
                     # Process the violation to remove 'manual-system' from image_path
-                    updated_path = violation[1].replace("manual-system\\", "/").replace("manual-system/", "/")
+                    updated_path = violation[2].replace("manual-system\\", "/").replace("manual-system/", "/")
                     processed_violation = list(violation)  # Convert tuple to list if necessary
-                    processed_violation[1] = updated_path  # Update the image_path
+                    processed_violation[2] = updated_path  # Update the image_path
                     
                     cur.close()
 
@@ -266,45 +330,46 @@ def casecheck():
         except Exception as e:
             logger.error(f"Casecheck GET error: {e}")
             return "An error occurred during case checking.", 500
-
-# Route for ticket generation
 @app.route('/ticket/<int:violation_id>')
 def ticket(violation_id):
     try:
+        # Combine data from violations, car_information, and violations_information
         cur = mysql.connection.cursor()
         cur.execute("""
             SELECT 
-                violation_id, 
-                license_plate, 
-                driver_name, 
-                gender, 
-                driver_birth_date, 
-                violation_time, 
-                violation_location, 
-                actual_speed, 
-                speed_limit, 
-                fine_amount, 
-                violation_description, 
-                image_path 
-            FROM violations 
-            WHERE violation_id = %s
+                v.violation_id, 
+                v.license_plate, 
+                v.violation_time, 
+                vi.location AS violation_location, 
+                vi.speed AS actual_speed, 
+                vi.speed_limit, 
+                vi.fee AS fine_amount, 
+                v.violation_description, 
+                v.image_path,
+                c.driver_name, 
+                c.gender, 
+                c.birth_date 
+            FROM violations v
+            JOIN car_information c ON v.license_plate = c.license_plate
+            JOIN violations_information vi ON v.violation_id = vi.id
+            WHERE v.violation_id = %s
         """, (violation_id,))
         violation = cur.fetchone()
         cur.close()
 
         if violation:
-            # Process the violation to remove 'manual-system' from image_path
-            updated_path = violation[11].replace("manual-system\\", "/").replace("manual-system/", "/")
-
-            processed_violation = list(violation)  # Convert tuple to list if necessary
-            processed_violation[11] = updated_path  # Update the image_path
-
-            return render_template('ticket.html', violation=processed_violation)
+            # Process the image_path to correct the prefix
+            updated_path = violation[8].replace("manual-system\\", "/").replace("manual-system/", "/")
+            violation = list(violation)  # Convert tuple to list if needed
+            violation[8] = updated_path  # Update the image_path
+            
+            return render_template('ticket.html', violation=violation)
         else:
             return f"No violation found with ID {violation_id}", 404
     except Exception as e:
         logger.error(f"Ticket generation error: {e}")
         return "An error occurred during ticket generation.", 500
+
 
 @app.route('/delete_case', methods=['POST'])
 def delete_case():
@@ -329,6 +394,22 @@ def delete_case():
     except Exception as e:
         logger.error(f"Delete case error: {e}")
         return f"An error occurred during deletion: {str(e)}", 500
+
+@app.route('/update_status/<int:violation_id>', methods=['POST'])
+def update_status(violation_id):
+    try:
+        # Update the `status_print` to `printed` for the given violation_id
+        with mysql.connection.cursor() as cur:
+            cur.execute("UPDATE violations SET status_print = %s WHERE violation_id = %s AND status_print = %s",
+                        ("printed", violation_id, "not-printed"))
+            mysql.connection.commit()
+
+        # Redirect to a confirmation page or back to the main case view
+        return redirect(url_for('caseview_all'))  # Replace with your desired route
+    except Exception as e:
+        logger.error(f"Error updating status_print for violation_id {violation_id}: {e}")
+        return "An error occurred while updating the status.", 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
