@@ -116,7 +116,7 @@ for filename in os.listdir(images_dir):
             # If more than one plate was detected, set recognition_status to "failed"
             if license_plate_count > 1:
                 recognition_status = "failed"
-                reason = "Multiple vehicles detected"
+                reason = "無法辨識\n原因:重複車牌"
             # If no plate was detected at all, it's "fake data"
             elif recognition_status == "failed":
                 reason = "Fake data - no plate detected"

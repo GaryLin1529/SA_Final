@@ -151,22 +151,23 @@
             }
         }
 
-        /* Alert styling */
-        .alert {
-            padding: 10px;
-            background-color: #f44336;
-            color: white;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-
         #printed {
             background-color: #16283d;
         }
 
         #not-printed {
             background-color: #4a90e2;
+        }
+
+        .A01,
+        .A03 {
+            content-visibility: hidden;
+            margin-bottom: -13px;
+        }
+
+        #A02,
+        #A04 {
+            content-visibility: hidden;
         }
     </style>
 </head>
@@ -179,13 +180,6 @@
             <h2>處理清單</h2>
             <button class="back-button" onclick="window.location.href='/'">返回首頁</button>
         </div>
-
-        <!-- Alert for no violations -->
-        {% if alert_message %}
-        <div class="alert">
-            {{ alert_message }}
-        </div>
-        {% endif %}
 
         <!-- Filter Buttons -->
         <div class="filter-buttons">
@@ -216,9 +210,11 @@
                 </td>
                 <td>{{ violation[2] }}</td>
                 <td>
-                    <form action="{{ url_for('ticket', violation_id=violation[0]) }}" method="get">
-                        <button id="{{violation[4]}}" type="submit">前往列印</button>
+                    <form id="{{violation[4]}}" action="{{ url_for('ticket', violation_id=violation[0]) }}"
+                        method="get">
+                        <button id="{{violation[3]}}" type="submit">前往列印</button>
                     </form>
+                    <p class="{{violation[4]}}">{{violation[5]}}</p>
                 </td>
             </tr>
             {% endfor %}

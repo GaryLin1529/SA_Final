@@ -67,13 +67,18 @@ def login():
 def caseview_all_manual():
     if 'user_id' not in session:
         return redirect(url_for('index'))
+    
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
-        cur.execute('SELECT violation_id, image_path, license_plate, status FROM violations WHERE recognition = %s OR archive = %s ',("failed","archived"))
-        ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
+
+        # Selecting violations with image_name = 'A03'
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM violations WHERE image_name = %s', ("A03",))
         violations = cur.fetchall()
+
+        if not violations:
+            logger.info("No violations found for image_name = A03")  # Log if no violations found
+            return render_template('caseview_all_manual.html', violations=[], processing_personnel=user[0])
 
         # Process image paths to remove 'manual-system'
         processed_violations = []
@@ -83,14 +88,17 @@ def caseview_all_manual():
             processed_violation[1] = updated_path  # Update the image_path
             processed_violations.append(processed_violation)
 
+        # Fetch the user associated with the current session
         cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
         user = cur.fetchone()
         cur.close()
 
         return render_template('caseview_all_manual.html', violations=processed_violations, processing_personnel=user[0])
+    
     except Exception as e:
-        logger.error(f"Caseview error: {e}")
-        return "An error occurred while fetching cases.", 500
+        logger.error(f"Error in caseview_all_manual: {e}")
+        return "An error occurred while fetching the cases.", 500
+
 
 @app.route('/caseview_all')
 def caseview_all():
@@ -109,8 +117,8 @@ def caseview_all():
                 v.status_print, 
                 v.image_name 
             FROM violations v
-            WHERE TRIM(v.recognition) = %s
-        """, ("success",))
+            WHERE TRIM(v.recognition) = %s OR v.image_name = %s
+        """, ("success", "A04"))
         
         violations = cur.fetchall()
 
@@ -145,10 +153,13 @@ def caseview_all():
 def caseview_ticket_pending():
     if 'user_id' not in session:
         return redirect(url_for('index'))
+    
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status, status_print FROM violations WHERE TRIM(recognition) = %s AND TRIM(status_print) = %s', ("success","not-printed",))
+
+        # Fix the query with proper parentheses for the OR condition
+        cur.execute('SELECT violation_id, image_path, license_plate, status_print, image_name FROM violations WHERE (TRIM(recognition) = %s AND TRIM(status_print) = %s) OR image_name = %s', ("success", "not-printed", "A04",))
         violations = cur.fetchall()
 
         # Process the violations to remove 'manual-system' from image_path
@@ -157,8 +168,16 @@ def caseview_ticket_pending():
             updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
             processed_violation = list(violation)  # Convert tuple to list if necessary
             processed_violation[1] = updated_path  # Update the image_path
-            processed_violations.append(processed_violation)
 
+            # Fetch the reason for this license_plate from ai_results
+            cur.execute("SELECT reason FROM ai_results WHERE license_plate = %s", (violation[2],))
+            reason_result = cur.fetchone()
+            reason = reason_result[0] if reason_result else "無法辨識\n原因:重複車牌"  # Default if no reason is found
+
+            processed_violation.append(reason)  # Add reason to the processed violation list
+            processed_violations.append(processed_violation)  # Add processed violation
+
+        # Fetch the user information
         cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
         user = cur.fetchone()
         cur.close()
@@ -168,9 +187,11 @@ def caseview_ticket_pending():
             return render_template('caseview_ticket_pending.html', alert_message="No pending ticket found.", violations=[], processing_personnel=user[0])
 
         return render_template('caseview_ticket_pending.html', violations=processed_violations, processing_personnel=user[0])
+    
     except Exception as e:
-        logger.error(f"Caseview_all error: {e}")
-        return "An error occurred while fetching all cases.", 500
+        logger.error(f"Caseview_ticket_pending error: {e}")
+        return "An error occurred while fetching pending tickets.", 500
+
     
 @app.route('/caseview_ticket_processed')
 def caseview_ticket_processed():
@@ -245,8 +266,8 @@ def caseview_pending():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s', ("pending","failed",))
-
+        ##cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s', ("pending","failed",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE image_name = %s AND status = %s', ("A03","pending"))
         violations = cur.fetchall()
         logger.info(f"Fetched violations: {violations}")  # Log the fetched violations
 
@@ -443,6 +464,7 @@ def ticket(violation_id):
     except Exception as e:
         logger.error(f"Ticket generation error: {e}")
         return render_template('noticket.html', violation_id=violation_id, reason="發生錯誤，無法顯示罰單")
+
 
 
 
