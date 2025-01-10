@@ -48,25 +48,11 @@ CREATE TABLE violations (
     archive VARCHAR(255),
     fee INT
 );
-INSERT INTO violations (
-    image_name, 
-    violation_time, 
-    location, 
-    camera_id, 
-    image_path, 
-    status, 
-    violation_type,
-    speed_limit,
-    car_speed,
-    coordinates,
-    violation_description,
-    status_print,
-    fee
-) VALUES
-('A01', '2024/1/10 12:00 AM', '台北市中正區信義路二段23號', 'ID004', 'manual-system/static/images/A01.png', 'pending', 'Speeding', '50', '70', '25.035202348798737, 121.52559153744765', '違規超速', 'not-printed','155'),
-('A02', '2024/1/10 12:01 AM', '台北市大安區信義路三段23號', 'ID005', 'manual-system/static/images/A02.png', 'pending', 'Speeding', '50', '75', '25.033909150131706, 121.53400604908703', '違規超速', 'not-printed','150'),
-('A03', '2024/1/10 12:02 AM', '台北市大安區信義路四段1-106號', 'ID006', 'manual-system/static/images/A03.png', 'pending', 'Speeding', '50', '65', '25.033784303543637, 121.54423799511962', '違規超速', 'not-printed', '160'),
-('A04', '2024/1/10 12:03 AM', '台北市信義區信義路五段23號', 'ID007', 'manual-system/static/images/A04.png', 'pending', 'Speeding', '60', '80', '25.03343022963543, 121.56882062395569', '違規超速','not-printed','200');
+INSERT INTO `violations` (`image_name`, `violation_time`, `location`, `camera_id`, `image_path`, `status`, `violation_type`, `speed_limit`, `car_speed`, `coordinates`, `violation_description`, `status_print`, `fee`, `longitude`, `latitude`) VALUES
+('A01', '2024/1/10 12:00 AM', '台北市中正區信義路二段23號', 'ID004', 'manual-system/static/images/A01.png', 'pending', 'Speeding', '50', '70', '25.035202348798737, 121.52559153744765', '違規超速', 'not-printed', '155', 25.035075899999999, 121.523038075376604),
+('A02', '2024/1/10 12:01 AM', '台北市大安區信義路三段23號', 'ID005', 'manual-system/static/images/A02.png', 'pending', 'Speeding', '50', '75', '25.033909150131706, 121.53400604908703', '違規超速', 'not-printed', '150', 25.033781999999999, 121.531559875376544),
+('A03', '2024/1/10 12:02 AM', '台北市大安區信義路四段1-106號', 'ID006', 'manual-system/static/images/A03.png', 'pending', 'Speeding', '50', '65', '25.033784303543637, 121.54423799511962', '違規超速', 'not-printed', '160', 25.033719999999999, 121.541663075376476),
+('A04', '2024/1/10 12:03 AM', '台北市信義區信義路五段23號', 'ID007', 'manual-system/static/images/A04.png', 'pending', 'Speeding', '60', '80', '25.03343022963543, 121.56882062395569', '違規超速', 'not-printed', '200', 25.033313000000000, 121.566234975376446);
 
 
 -- Create the manual_recognition table
@@ -112,3 +98,5 @@ INSERT INTO car_information (license_plate, driver_name, gender, birth_date, add
 
 
 
+
+ALTER TABLE `violations` ADD COLUMN `longitude` DOUBLE, ADD COLUMN `latitude` DOUBLE;
