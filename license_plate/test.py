@@ -70,7 +70,7 @@ for filename in os.listdir(images_dir):
             license_plate = None
             recognition_status = "failed"  # Default to failed if no plate is detected
             license_plate_count = 0  # Counter to track the number of plates detected
-            reason = "無法辨識\n原因:假車牌"  # Default failure reason
+            reason = "無法辨識原因:\n假車牌"  # Default failure reason
 
             # If prediction contains any plates, set recognition status to success
             for pred in prediction['predictions']:
@@ -116,7 +116,7 @@ for filename in os.listdir(images_dir):
             # If more than one plate was detected, set recognition_status to "failed"
             if license_plate_count > 1:
                 recognition_status = "failed"
-                reason = "無法辨識\n原因:重複車牌"
+                reason = "無法辨識原因:\n多車牌"
             # If no plate was detected at all, it's "fake data"
             elif recognition_status == "failed":
                 reason = "Fake data - no plate detected"

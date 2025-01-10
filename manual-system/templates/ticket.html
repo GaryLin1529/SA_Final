@@ -220,9 +220,41 @@
         </div>
     </div>
     <div id="container_print">
-        <form action="{{ url_for('update_status', violation_id=violation[0]) }}" method="post">
-            <button id="btn_print" type="submit">列印</button>
-        </form>
+        <div id="container_print">
+            <form id="printForm" action="{{ url_for('update_status', violation_id=violation[0]) }}" method="post">
+                <button id="btn_print" type="submit">列印</button>
+            </form>
+        </div>
+        <script>
+            document.getElementById("printForm").addEventListener("submit", function(e) {
+              e.preventDefault(); // 阻止一般表單送出的預設行為
+            
+              const btn = document.getElementById("btn_print");
+              
+              fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+              })
+              .then(response => {
+                if (response.ok) {
+                  // 先把 button 變成灰階、禁用
+                  btn.disabled = true;
+                  btn.style.backgroundColor = "gray";
+                  window.print(); // 後端更新成功後再呼叫列印
+                  
+                  // 列印完成後延遲跳轉回 caseview_all
+                  setTimeout(() => {
+                    window.location.href = "{{ url_for('caseview_all') }}";
+                  }, 500);
+                } else {
+                  console.error("更新狀態失敗: ", response.statusText);
+                }
+              })
+              .catch(error => {
+                console.error("更新狀態出錯: ", error);
+              });
+            });
+            </script>
 
     </div>
 </body>
