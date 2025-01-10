@@ -89,23 +89,25 @@ CREATE TABLE car_information (
     id INT AUTO_INCREMENT PRIMARY KEY,       -- Unique identifier for each record
     license_plate VARCHAR(20) NOT NULL,     -- License plate number
     driver_name VARCHAR(100),               -- Driver's name
-    gender ENUM('Male', 'Female'),          -- Gender of the driver
-    birth_date DATE                         -- Driver's birth date
+    gender ENUM('男', '女'),          -- Gender of the driver
+    birth_date DATE,
+    address VARCHAR(50) -- Driver's birth date
 );
 
 -- Insert sample data into car_information
-INSERT INTO car_information (license_plate, driver_name, gender, birth_date) VALUES
-('AFF0666', 'Donny Huang', 'Male', '1985-06-15'),
-('ALN7567', 'Lily Chen', 'Female', '1990-03-22'),
-('QWE7890', 'Kevin Lin', 'Male', '1978-09-11'),
-('APP6961', 'Emily Wu', 'Female', '1995-12-05'),
-('ZXC1230', 'Jason Wang', 'Male', '1988-01-18'),
-('JKL4561', 'Jessica Liu', 'Female', '1992-07-10'),
-('MNB0987', 'William Zhang', 'Male', '1980-11-30'),
-('POI6789', 'Sarah Lee', 'Female', '1999-05-14'),
-('LKH5678', 'Eric Xu', 'Male', '1983-08-08'),
-('UYT4321', 'Sophia Sun', 'Female', '1997-04-28'),
-('BGR-5851', 'Sophia Sun', 'Female', '1997-04-28');
+INSERT INTO car_information (license_plate, driver_name, gender, birth_date, address) VALUES
+('AFF0666', '劉阿豪', '男', '1985-06-15', '桃園市八德區永福路段8號'),
+('BGR-5851', '劉土豪', '男', '1997-04-28', '桃園市缺德路87號'),
+('QWE7890', '林建宏', '男', '1978-09-11', '桃園市八德區和平路8巷5號'),
+('APP6961', '吳小華', '女', '1995-12-05', '桃園市八德區中山路12號'),
+('ZXC1230', '王大仁', '男', '1988-01-18', '桃園市八德區復興路25號'),
+('JKL4561', '劉雅婷', '女', '1992-07-10', '桃園市八德區信義路38號'),
+('MNB0987', '張文傑', '男', '1980-11-30', '桃園市八德區文化路68巷9號'),
+('POI6789', '李淑華', '女', '1999-05-14', '桃園市八德區成功路7號'),
+('LKH5678', '許志明', '男', '1983-08-08', '桃園市八德區光復路23巷4弄6號'),
+('UYT4321', '孫莉莉', '女', '1997-04-28', '桃園市八德區忠孝路22號');
+
+
 
 
 
