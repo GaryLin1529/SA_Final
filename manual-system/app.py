@@ -4,7 +4,6 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 from datetime import datetime
 
-
 app = Flask(__name__)
 
 # Configure MySQL connection settings
