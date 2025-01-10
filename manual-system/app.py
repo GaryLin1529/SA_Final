@@ -126,7 +126,7 @@ def caseview_all():
                 SELECT reason FROM ai_results WHERE license_plate = %s
             """, (violation[2],))
             reason_result = cur.fetchone()
-            reason = reason_result[0] if reason_result else "Unknown reason"  # Default if no reason is found
+            reason = reason_result[0] if reason_result else "無法辨識\n原因:重複車牌"  # Default if no reason is found
 
             processed_violation.append(reason)  # Add reason to the processed violation list
             processed_violations.append(processed_violation)
