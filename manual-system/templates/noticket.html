@@ -1,44 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Noticket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="main.css">
+    <link rel="stylesheet" href="main.css">
     <script src="main.js"></script>
     <style>
+        /* Global Styles */
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f4f8;
+            background-color: #f4f4f4;
             color: #333;
         }
 
-        h1 {
-            font-size: 2rem;
-            color: #d32f2f;
+        /* Container Box */
+        .container {
             text-align: center;
-            padding: 20px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+            padding: 50px 30px;
+            max-width: 500px;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
             border: 2px solid #d32f2f;
-            border-radius: 10px;
-            background: #ffffff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            /* Red border */
+            background-color: #fff0f0;
+            /* Light red background for the container */
+        }
+
+        /* Header Styling */
+        h1 {
+            font-size: 2.5rem;
+            color: #d32f2f;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-bottom: 10px;
+        }
+
+        /* Reason Box */
+        .reason-container {
+            display: inline-block;
+            font-size: 1.6rem;
+            color: #d32f2f;
+            padding: 20px 40px;
+            border: 2px solid #d32f2f;
+            /* Red border */
+            border-radius: 8px;
+            background-color: #fff;
+            /* Soft red background */
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>無效車牌，無法顯示罰單</h1>
-    <h2>原因: {{ license_plate[0] }}</h2>
-
-
-
+    <div class="container">
+        <h1>無效車牌，無法顯示罰單</h1>
+        <div class="reason-container">
+            <span>原因: </span>
+            <span>{{ license_plate[0] }}</span>
+        </div>
+    </div>
 </body>
 
 </html>
