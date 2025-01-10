@@ -92,7 +92,6 @@ def caseview_all_manual():
         logger.error(f"Caseview error: {e}")
         return "An error occurred while fetching cases.", 500
 
-
 @app.route('/caseview_all')
 def caseview_all():
     if 'user_id' not in session:
@@ -100,7 +99,19 @@ def caseview_all():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status_print FROM violations WHERE TRIM(recognition) = %s', ("success",))
+        
+        # Get violations where recognition is 'success'
+        cur.execute("""
+            SELECT 
+                v.violation_id, 
+                v.image_path, 
+                v.license_plate, 
+                v.status_print, 
+                v.image_name 
+            FROM violations v
+            WHERE TRIM(v.recognition) = %s
+        """, ("success",))
+        
         violations = cur.fetchall()
 
         # Process the violations to remove 'manual-system' from image_path
@@ -109,6 +120,15 @@ def caseview_all():
             updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
             processed_violation = list(violation)  # Convert tuple to list if necessary
             processed_violation[1] = updated_path  # Update the image_path
+            
+            # Fetch the reason for this license_plate from ai_results
+            cur.execute("""
+                SELECT reason FROM ai_results WHERE license_plate = %s
+            """, (violation[2],))
+            reason_result = cur.fetchone()
+            reason = reason_result[0] if reason_result else "Unknown reason"  # Default if no reason is found
+
+            processed_violation.append(reason)  # Add reason to the processed violation list
             processed_violations.append(processed_violation)
 
         cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
@@ -119,6 +139,7 @@ def caseview_all():
     except Exception as e:
         logger.error(f"Caseview_all error: {e}")
         return "An error occurred while fetching all cases.", 500
+
    
 @app.route('/caseview_ticket_pending')
 def caseview_ticket_pending():
@@ -403,16 +424,26 @@ def ticket(violation_id):
 
             return render_template('ticket.html', violation=violation)
         else:
-            # Query to fetch the license_plate for the violation_id
+            # If no violation is found, retrieve the reason from ai_results
+            cur.execute("""
+                SELECT reason FROM ai_results WHERE license_plate = (
+                    SELECT license_plate FROM violations WHERE violation_id = %s
+                )
+            """, (violation_id,))
+            result = cur.fetchone()
+            reason = result[0] if result else "未知原因"  # Default reason if not found
+
+            # Get the license_plate to display as well
             cur.execute("SELECT license_plate FROM violations WHERE violation_id = %s", (violation_id,))
             license_plate = cur.fetchone()
 
-            # If no violation is found, pass violation_id and license_plate to the template
-            return render_template('noticket.html', violation_id=violation_id, license_plate=license_plate)
+            # Pass violation_id, license_plate, and reason to the template
+            return render_template('noticket.html', violation_id=violation_id, license_plate=license_plate, reason=reason)
 
     except Exception as e:
         logger.error(f"Ticket generation error: {e}")
-        return render_template('noticket.html', violation_id=violation_id, license_plate=None)
+        return render_template('noticket.html', violation_id=violation_id, reason="發生錯誤，無法顯示罰單")
+
 
 
 if __name__ == '__main__':

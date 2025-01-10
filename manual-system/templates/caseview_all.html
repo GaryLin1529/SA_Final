@@ -158,6 +158,16 @@
         #not-printed {
             background-color: #4a90e2;
         }
+
+        .A01,
+        .A03 {
+            content-visibility: hidden;
+        }
+
+        #A02,
+        #A04 {
+            content-visibility: hidden;
+        }
     </style>
 </head>
 
@@ -199,9 +209,11 @@
                 </td>
                 <td>{{ violation[2] }}</td>
                 <td>
-                    <form action="{{ url_for('ticket', violation_id=violation[0]) }}" method="get">
+                    <form id="{{violation[4]}}" action="{{ url_for('ticket', violation_id=violation[0]) }}"
+                        method="get">
                         <button id="{{violation[3]}}" type="submit">前往列印</button>
                     </form>
+                    <p class="{{violation[4]}}">{{violation[5]}}</p>
                 </td>
             </tr>
             {% endfor %}

@@ -24,7 +24,8 @@ CREATE TABLE ai_results(
     image_name VARCHAR(255),
     image_path VARCHAR(255),
     license_plate VARCHAR(255),
-    recognition VARCHAR(255)
+    recognition VARCHAR(255),
+    reason VARCHAR(255)
 );
 
 -- Create the violations table
