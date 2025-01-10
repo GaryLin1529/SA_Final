@@ -78,7 +78,8 @@ INSERT INTO car_information (license_plate, driver_name, gender, birth_date) VAL
 ('MNB0987', 'William Zhang', 'Male', '1980-11-30'),
 ('POI6789', 'Sarah Lee', 'Female', '1999-05-14'),
 ('LKH5678', 'Eric Xu', 'Male', '1983-08-08'),
-('UYT4321', 'Sophia Sun', 'Female', '1997-04-28');
+('UYT4321', 'Sophia Sun', 'Female', '1997-04-28'),
+('BGR-5851', 'Sophia Sun', 'Female', '1997-04-28');
 
 
 CREATE TABLE violations_information(
