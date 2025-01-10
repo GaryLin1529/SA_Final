@@ -18,6 +18,13 @@ CREATE TABLE userlogin (
 INSERT INTO userlogin (username, email, password_hash) 
 VALUES ('root', 'root@gmail.com', '1234');
 
+CREATE TABLE ai_results(
+	ai_results_id INT AUTO_INCREMENT PRIMARY KEY,
+    image_name VARCHAR(255),
+    image_path VARCHAR(255),
+    license_plate VARCHAR(255),
+    recognition VARCHAR(255)
+);
 
 -- Create the violations table
 CREATE TABLE violations (
@@ -31,7 +38,8 @@ CREATE TABLE violations (
     violation_type VARCHAR(100),
     recognition VARCHAR(255),
     violation_description VARCHAR(255),
-    status_print VARCHAR(255)
+    status_print VARCHAR(255),
+    archive VARCHAR(255)
 );
 
 -- Create the manual_recognition table
@@ -62,7 +70,7 @@ CREATE TABLE car_information (
 -- Insert sample data into car_information
 INSERT INTO car_information (license_plate, driver_name, gender, birth_date) VALUES
 ('AFF0666', 'Donny Huang', 'Male', '1985-06-15'),
-('ALN7568', 'Lily Chen', 'Female', '1990-03-22'),
+('ALN7567', 'Lily Chen', 'Female', '1990-03-22'),
 ('QWE7890', 'Kevin Lin', 'Male', '1978-09-11'),
 ('APP6961', 'Emily Wu', 'Female', '1995-12-05'),
 ('ZXC1230', 'Jason Wang', 'Male', '1988-01-18'),
@@ -85,7 +93,7 @@ CREATE TABLE violations_information(
 -- Insert sample data into violations_information
 INSERT INTO violations_information (license_plate, location, speed, fee, speed_limit) VALUES
 ('AFF0666', 'Downtown Road', 80, 500, 60),
-('ALN7568', 'Main Highway', 95, 700, 80),
+('ALN7567', 'Main Highway', 95, 700, 80),
 ('QWE7890', 'Broadway Street', 75, 300, 50),
 ('APP6961', 'Sunset Boulevard', 100, 1000, 80),
 ('ZXC1230', 'Ocean Avenue', 85, 600, 70);

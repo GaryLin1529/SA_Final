@@ -71,7 +71,7 @@ def caseview_all_manual():
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
         ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
-        cur.execute('SELECT violation_id, image_path, license_plate, status FROM violations WHERE recognition = %s',("failed",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM violations WHERE recognition = %s OR archive = %s ',("failed","archived"))
         ##cur.execute('SELECT violation_id, image_path, license_plate, status, remarks FROM violations ')
         violations = cur.fetchall()
 
@@ -190,7 +190,7 @@ def caseview_processed():
     try:
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s', ("processed","failed",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status FROM human.violations WHERE TRIM(status) = %s AND TRIM(recognition) = %s OR TRIM(archive)= %s', ("processed","failed","archived"))
         
         violations = cur.fetchall()
         logger.info(f"Fetched violations: {violations}")  # Log the fetched violations
@@ -290,9 +290,9 @@ def casecheck():
             # Update the violations table with the processed status and recognized license plate
             cur.execute(""" 
                 UPDATE violations 
-                SET status = %s, license_plate = %s 
+                SET status = %s, license_plate = %s, recognition = %s, archive = %s 
                 WHERE violation_id = %s
-            """, ("processed", manual_recognize_plate, violation_id))
+            """, ("processed", manual_recognize_plate, "success", "archived", violation_id ))
 
 
             mysql.connection.commit()  # Commit the transaction
@@ -365,7 +365,7 @@ def ticket(violation_id):
             
             return render_template('ticket.html', violation=violation)
         else:
-            return f"No violation found with ID {violation_id}", 404
+            return render_template('noticket.html')
     except Exception as e:
         logger.error(f"Ticket generation error: {e}")
         return "An error occurred during ticket generation.", 500

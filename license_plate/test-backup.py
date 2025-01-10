@@ -18,7 +18,6 @@ reader = easyocr.Reader(['en'])
 # Assuming this script is in the root of your project
 images_dir = os.path.join("manual-system", "static", "images")
 
-
 # Database Connection
 def connect_to_db():
     return mysql.connector.connect(
@@ -31,11 +30,9 @@ def connect_to_db():
 # Insert data into violations table
 def insert_violation(cursor, data):
     query = """
-    INSERT INTO violations (
-        violation_time, location, camera_id, image_path, status, 
-        license_plate, violation_type, violation_description
+    INSERT INTO ai_results (
+       image_path, license_plate, recognition
     ) VALUES (
-        %s, %s, %s, %s, %s, 
         %s, %s, %s
     )
     """
@@ -49,11 +46,17 @@ if not os.path.exists(images_dir):
 # Process each image
 for filename in os.listdir(images_dir):
     if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+
         image_path = os.path.join(images_dir, filename)
         try:
             image = Image.open(image_path)
             prediction = model.predict(image_path, confidence=40, overlap=30).json()
 
+            license_plate = None
+            recognition_status = "failed"  # Default to failed if no plate is detected
+            license_plate_count = 0  # Counter to track the number of plates detected
+
+            # If prediction contains any plates, set recognition status to success
             for pred in prediction['predictions']:
                 # Expand crop area by 15%
                 x, y, w, h = pred['x'], pred['y'], pred['width'] * 1.15, pred['height'] * 1.15
@@ -81,38 +84,44 @@ for filename in os.listdir(images_dir):
 
                 # Combine Results
                 if cropped_text:
+                    license_plate_count += 1
                     license_plate = "".join([item[1] for item in cropped_text]).strip()
+                    # If more than one plate is detected, set recognition_status to "failed"
+                    if license_plate_count > 1:
+                        recognition_status = "failed"
+                        break
+                    recognition_status = "success"  # Set to success if plate is detected
                     print(f"File: {filename}")
                     print(f"License Plate: {license_plate}")
                     print("-" * 30)
 
-                    # Database Insertion
-                    try:
-                        db_conn = connect_to_db()
-                        cursor = db_conn.cursor()
-                        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # If more than one plate was detected, set recognition_status to "failed"
+            if license_plate_count > 1:
+                recognition_status = "failed"
 
-                        data = (
-                            current_time,          # violation_time
-                            "Unknown Location",    # location
-                            "CAM-12345",           # camera_id
-                            image_path,            # image_path
-                            "pending",             # status
-                            license_plate,         # license_plate
-                            "Speeding",            # violation_type (example)
-                            "Exceeding speed limit"  # violation_description (example)
-                        )
+            # Database Insertion (even if no license plate was detected)
+            try:
+                db_conn = connect_to_db()
+                cursor = db_conn.cursor()
+                current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-                        insert_violation(cursor, data)
-                        db_conn.commit()
-                        print(f"Data inserted for {filename}: {license_plate}")
+                # If no plate detected, leave license_plate as None (or empty string)
+                data = (
+                    image_path,            # image_path
+                    license_plate or "",   # license_plate (empty if not detected
+                    recognition_status,     # recognition status (success or failed)
+                )
 
-                    except mysql.connector.Error as err:
-                        print(f"Database error: {err}")
-                    finally:
-                        if db_conn.is_connected():
-                            cursor.close()
-                            db_conn.close()
+                insert_violation(cursor, data)
+                db_conn.commit()
+                print(f"Data inserted for {filename}: {license_plate or 'No plate detected'}")
+
+            except mysql.connector.Error as err:
+                print(f"Database error: {err}")
+            finally:
+                if db_conn.is_connected():
+                    cursor.close()
+                    db_conn.close()
 
         except Exception as e:
             print(f"Failed to process {filename}: {str(e)}")
