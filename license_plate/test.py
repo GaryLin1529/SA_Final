@@ -27,18 +27,18 @@ def connect_to_db():
         database="human"         # Update with your DB name
     )
 
-# Insert data into ai_results table
+# Insert data into ai_results table (no reason field)
 def insert_ai_results(cursor, data):
     query = """
     INSERT INTO ai_results (
-        image_name, image_path, license_plate, recognition, reason
+        image_name, image_path, license_plate, recognition
     ) VALUES (
-        %s, %s, %s, %s, %s
+        %s, %s, %s, %s
     )
     """
     cursor.execute(query, data)
 
-# Update recognition status and license plate in violations table
+# Update recognition status and license plate in violations table (no reason field)
 def update_violations(cursor, image_name, recognition, license_plate):
     query = """
     UPDATE violations
@@ -70,7 +70,6 @@ for filename in os.listdir(images_dir):
             license_plate = None
             recognition_status = "failed"  # Default to failed if no plate is detected
             license_plate_count = 0  # Counter to track the number of plates detected
-            reason = "無法辨識原因:\n假車牌"  # Default failure reason
 
             # If prediction contains any plates, set recognition status to success
             for pred in prediction['predictions']:
@@ -106,7 +105,6 @@ for filename in os.listdir(images_dir):
                     # If more than one plate is detected, set recognition_status to "failed"
                     if license_plate_count > 1:
                         recognition_status = "failed"
-                        reason = "Multiple vehicles detected"
                         break
                     recognition_status = "success"  # Set to success if plate is detected
                     print(f"File: {filename}")
@@ -116,10 +114,9 @@ for filename in os.listdir(images_dir):
             # If more than one plate was detected, set recognition_status to "failed"
             if license_plate_count > 1:
                 recognition_status = "failed"
-                reason = "無法辨識原因:\n多車牌"
             # If no plate was detected at all, it's "fake data"
             elif recognition_status == "failed":
-                reason = "Fake data - no plate detected"
+                license_plate = ""
 
             # Remove file extension from filename
             processed_filename = process_image_name(filename)
@@ -130,13 +127,12 @@ for filename in os.listdir(images_dir):
                 cursor = db_conn.cursor()
                 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-                # Data for ai_results table (including the reason)
+                # Data for ai_results table (without the reason)
                 ai_data = (
                     processed_filename,
                     image_path,            # image_path
                     license_plate or "",   # license_plate (empty if not detected)
-                    recognition_status,    # recognition status (success or failed)
-                    reason                 # failure reason
+                    recognition_status     # recognition status (success or failed)
                 )
 
                 # Insert into ai_results table

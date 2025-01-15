@@ -203,12 +203,12 @@
 
         <table>
             <tr>
-                <th>流水號</th>
-                <th>照片</th>
-                <th>車牌號</th>
-                <th>處理狀態</th>
-                <th>處理</th>
-                <th>刪除</th>
+                <th>ID</th>
+                <th>Picture</th>
+                <th>License Plate</th>
+                <th>Status</th>
+                <th>Manage</th>
+                <th>Delete</th>
             </tr>
             {% for violation in violations %}
             <tr>
@@ -216,7 +216,7 @@
                 <td>
                     <img src="{{ violation[1] }}" alt="Violation Image" width="100">
                 </td>
-                <td>{{ violation[2] }}</td>
+                <td>{{ violation[5] }}</td>
                 <td>{{ violation[3] }}</td>
                 <td>
                     <!-- Update the form to include the violation_id -->

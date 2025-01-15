@@ -98,57 +98,68 @@ def caseview_all_manual():
     except Exception as e:
         logger.error(f"Error in caseview_all_manual: {e}")
         return "An error occurred while fetching the cases.", 500
-
-
 @app.route('/caseview_all')
 def caseview_all():
     if 'user_id' not in session:
         return redirect(url_for('index'))
+    
     try:
+        # Get the current user's ID
         user_id = session.get('user_id')
         cur = mysql.connection.cursor()
-        
-        # Get violations where recognition is 'success'
+
+        # Query the violations table and join with ai_results based on image_name
         cur.execute("""
             SELECT 
                 v.violation_id, 
                 v.image_path, 
                 v.license_plate, 
                 v.status_print, 
-                v.image_name 
+                v.image_name,
+                ar.license_plate AS ai_license_plate,
+                v.reason
             FROM violations v
+            LEFT JOIN ai_results ar ON v.image_name = ar.image_name
             WHERE TRIM(v.recognition) = %s OR v.image_name = %s
         """, ("success", "A04"))
-        
+
+        # Fetch query results
         violations = cur.fetchall()
 
-        # Process the violations to remove 'manual-system' from image_path
+        # Process the image_path and update it by removing the "manual-system" part
         processed_violations = []
         for violation in violations:
             updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
-            processed_violation = list(violation)  # Convert tuple to list if necessary
-            processed_violation[1] = updated_path  # Update the image_path
+            processed_violation = list(violation)  # Convert tuple to list for modification
+            processed_violation[1] = updated_path  # Update image_path
             
-            # Fetch the reason for this license_plate from ai_results
-            cur.execute("""
-                SELECT reason FROM ai_results WHERE license_plate = %s
-            """, (violation[2],))
-            reason_result = cur.fetchone()
-            reason = reason_result[0] if reason_result else "無法辨識\n原因:重複車牌"  # Default if no reason is found
-
-            processed_violation.append(reason)  # Add reason to the processed violation list
+            # Use the license_plate from ai_results if available, otherwise use the one from violations
+            ai_license_plate = violation[5] if violation[5] else violation[2]
+            processed_violation.append(ai_license_plate)  # Add the final license plate to the list
+            
             processed_violations.append(processed_violation)
 
+        # Fetch user information
         cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])
         user = cur.fetchone()
         cur.close()
 
-        return render_template('caseview_all.html', violations=processed_violations, processing_personnel=user[0])
+        # Ensure user exists
+        if not user:
+            logger.error("User not found in the database.")
+            return "User not found.", 404
+
+        # Render the template and pass the data
+        return render_template(
+            'caseview_all.html',
+            violations=processed_violations,
+            processing_personnel=user[0]
+        )
     except Exception as e:
         logger.error(f"Caseview_all error: {e}")
         return "An error occurred while fetching all cases.", 500
 
-   
+
 @app.route('/caseview_ticket_pending')
 def caseview_ticket_pending():
     if 'user_id' not in session:
@@ -159,7 +170,7 @@ def caseview_ticket_pending():
         cur = mysql.connection.cursor()
 
         # Fix the query with proper parentheses for the OR condition
-        cur.execute('SELECT violation_id, image_path, license_plate, status_print, image_name FROM violations WHERE (TRIM(recognition) = %s AND TRIM(status_print) = %s) OR image_name = %s', ("success", "not-printed", "A04",))
+        cur.execute('SELECT violation_id, image_path, license_plate, status_print, image_name, reason FROM violations WHERE (TRIM(recognition) = %s AND TRIM(status_print) = %s) OR image_name = %s', ("success", "not-printed", "A04",))
         violations = cur.fetchall()
 
         # Process the violations to remove 'manual-system' from image_path
@@ -168,14 +179,7 @@ def caseview_ticket_pending():
             updated_path = violation[1].replace("manual-system\\", "").replace("manual-system/", "")
             processed_violation = list(violation)  # Convert tuple to list if necessary
             processed_violation[1] = updated_path  # Update the image_path
-
-            # Fetch the reason for this license_plate from ai_results
-            cur.execute("SELECT reason FROM ai_results WHERE license_plate = %s", (violation[2],))
-            reason_result = cur.fetchone()
-            reason = reason_result[0] if reason_result else "無法辨識\n原因:重複車牌"  # Default if no reason is found
-
-            processed_violation.append(reason)  # Add reason to the processed violation list
-            processed_violations.append(processed_violation)  # Add processed violation
+            processed_violations.append(processed_violation)
 
         # Fetch the user information
         cur.execute('SELECT username FROM userlogin WHERE id = %s', [user_id])

@@ -197,10 +197,10 @@
 
         <table>
             <tr>
-                <th>流水號</th>
-                <th>照片</th>
-                <th>車牌號</th>
-                <th>列印</th>
+                <th>ID</th>
+                <th>Picture</th>
+                <th>License Plate</th>
+                <th>Print</th>
             </tr>
             {% for violation in violations %}
             <tr>
@@ -208,13 +208,13 @@
                 <td>
                     <img src="{{ violation[1] }}" alt="Violation Image" width="100">
                 </td>
-                <td>{{ violation[2] }}</td>
+                <td>{{ violation[5] }}</td>
                 <td>
                     <form id="{{violation[4]}}" action="{{ url_for('ticket', violation_id=violation[0]) }}"
                         method="get">
                         <button id="{{violation[3]}}" type="submit">前往列印</button>
                     </form>
-                    <p class="{{violation[4]}}">{{violation[5]}}</p>
+                    <p class="{{violation[4]}}">{{violation[6]}}</p>
                 </td>
             </tr>
             {% endfor %}
